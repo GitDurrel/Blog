@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render,get_object_or_404
 from django.http import JsonResponse
 from .models import Post
 from django.views.decorators.csrf import csrf_exempt
@@ -14,7 +14,7 @@ def posts_lists(request):
 
     return JsonResponse({'posts': data})
 
-
+@csrf_exempt
 def add_posts(request):
     if request.method == 'POST':
         try:
@@ -36,6 +36,18 @@ def add_posts(request):
     return JsonResponse({'error': 'Méthode non autorisée'}, status=405)
 
 
+def posts_details(request, pk):
+    # Récupérer le post en fonction de l'identifiant (pk)
+    post = get_object_or_404(Post, pk=pk)
+    
+    # Retourner le post en format JSON
+    data = {
+        'id': post.id,
+        'titre': post.titre,
+        'contenu': post.contenu,
+        'auteur': post.auteur,
+        'date_publication': post.date_publication
+    }
+    
+    return JsonResponse({'post': data})
 
-def posts_details():
-    pass
