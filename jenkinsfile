@@ -1,0 +1,41 @@
+pipeline {
+    agent any
+
+    environment {
+        IMAGE_NAME = 'ton-dockerhub-utilisateur/blog_api'
+    }
+
+    stages {
+        stage('Cloner le dépôt') {
+            steps {
+                git 'https://github.com/GitDurrel/blog_api.git'
+            }
+        }
+
+        stage('Construire l\'image Docker') {
+            steps {
+                sh 'docker build -t $IMAGE_PROJECT .'
+            }
+        }
+
+        stage('Lancer les tests') {
+            steps {
+                sh 'docker run --rm $IMAGE_PROJECT python manage.py test'
+            }
+        }
+
+        stage('Pousser l\'image sur Docker Hub') {
+            steps {
+                withDockerRegistry([credentialsId: 'docker-hub-credentials', url: '']) {
+                    sh 'docker push $IMAGE_PROJECT'
+                }
+            }
+        }
+
+        stage('Déployer l\'application') {
+            steps {
+                sh 'docker-compose up -d'
+            }
+        }
+    }
+}
